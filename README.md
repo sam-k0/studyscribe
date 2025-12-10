@@ -62,4 +62,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - [OpenAI Whisper](https://github.com/openai/whisper) for the transcription technology
 - [Flask](https://flask.palletsprojects.com/) for the web framework
-- `qwen3-coder:3b` for vibecoding
+- `qwen3-coder:30b` for vibecoding

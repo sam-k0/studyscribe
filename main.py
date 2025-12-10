@@ -17,13 +17,16 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 # Create upload directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Get available models
+available_models = whisper.available_models()
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def transcribe_audio(file_path):
-    # Load the model
-    model = whisper.load_model("turbo")
+def transcribe_audio(file_path, model_name):
+    # Load the specified model
+    model = whisper.load_model(model_name)
     
     # Load and preprocess audio
     audio = whisper.load_audio(file_path)
@@ -44,7 +47,7 @@ def transcribe_audio(file_path):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', models=available_models)
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
@@ -57,13 +60,16 @@ def transcribe():
         return jsonify({'error': 'No audio file selected'}), 400
     
     if file and allowed_file(file.filename):
+        # Get selected model from form data
+        model_name = request.form.get('model', 'turbo')
+        
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
         
         try:
             # Transcribe the audio
-            text, language = transcribe_audio(file_path)
+            text, language = transcribe_audio(file_path, model_name)
             
             # Clean up the uploaded file
             os.remove(file_path)

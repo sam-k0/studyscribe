@@ -87,12 +87,34 @@
             font-weight: bold;
             color: #007bff;
         }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>StudyScribe - Whisper Transcription</h1>
         <p>Upload an audio file to transcribe it using Whisper AI</p>
+        
+        <div class="form-group">
+            <label for="modelSelect">Select Whisper Model:</label>
+            <select id="modelSelect" name="model">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
         
         <div class="upload-area" id="dropArea">
             <p>Drag & drop your audio file here or click to browse</p>
@@ -114,6 +136,21 @@
     </div>
 
     <script>
+        // Populate model dropdown with available models
+        const models = {{ models|tojson }};
+        const modelSelect = document.getElementById('modelSelect');
+        
+        models.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model;
+            option.textContent = model;
+            modelSelect.appendChild(option);
+        });
+        
+        // Set default selection to 'turbo' if available, otherwise first option
+        const defaultModel = models.includes('turbo') ? 'turbo' : models[0];
+        modelSelect.value = defaultModel;
+        
         const dropArea = document.getElementById('dropArea');
         const audioFileInput = document.getElementById('audioFile');
         
@@ -168,6 +205,7 @@
             // Create form data
             const formData = new FormData();
             formData.append('audio', file);
+            formData.append('model', document.getElementById('modelSelect').value);
             
             // Send to server
             fetch('/transcribe', {
